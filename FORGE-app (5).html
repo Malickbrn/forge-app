@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07070f">
+<title>FORGE · Your Personal OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070f;
+  --surface: #0e0e1c;
+  --surface2: #14142a;
+  --border: rgba(255,255,255,0.07);
+  --ink: #eeeaf8;
+  --muted: #5a5a7a;
+  --dim: #2a2a42;
+  --fire: #ff4f1a;
+  --ember: #ff8c42;
+  --cold: #3a8fff;
+  --ice: #7dc8ff;
+  --life: #2ee87a;
+  --gold: #ffd060;
+  --purple: #b06aff;
+  --r: 12px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── LAYOUT ── */
+#app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── TOP BAR ── */
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,7,15,0.95);
+  backdrop-filter: blur(20px);
+  position: relative; z-index: 100;
+  flex-shrink: 0;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+  background: linear-gradient(135deg, var(--fire), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+#fog-btn {
+  background: rgba(255,79,26,0.15);
+  border: 1px solid rgba(255,79,26,0.3);
+  color: var(--ember);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+#fog-btn:hover { background: rgba(255,79,26,0.25); }
+#date-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+
+/* ── NAV TABS ── */
+#nav {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg);
+}
+#nav::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex: 1; min-width: 60px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 8px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.nav-tab .tab-icon { font-size: 1.2rem; }
+.nav-tab.active { color: var(--ink); border-bottom-color: var(--fire); }
+.nav-tab:hover { color: var(--ink); }
+
+/* ── PAGES ── */
+#pages { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.page { display: none; padding: 20px 18px 100px; }
+.page.active { display: block; }
+
+/* ── PAGE: HOME ── */
+.identity-banner {
+  background: linear-gradient(135deg, rgba(255,79,26,0.1), rgba(58,143,255,0.1));
+  border: 1px solid rgba(255,79,26,0.2);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.identity-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--fire), var(--cold), var(--life));
+}
+.identity-greeting {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.identity-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.identity-sub strong { color: var(--ember); font-weight: 600; }
+
+/* Needs vitals */
+.vitals-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.vital {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.vital:active { transform: scale(0.96); }
+.vital-icon { font-size: 1.5rem; margin-bottom: 4px; }
+.vital-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.vital-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Daily ritual */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.section-reset {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.ritual-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.ritual-item {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.ritual-item.done {
+  border-color: rgba(46,232,122,0.3);
+  background: rgba(46,232,122,0.05);
+}
+.ritual-item.done::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(46,232,122,0.05), transparent);
+  pointer-events: none;
+}
+.ritual-check {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--dim);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+.ritual-item.done .ritual-check {
+  background: var(--life);
+  border-color: var(--life);
+}
+.ritual-text { flex: 1; }
+.ritual-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+.ritual-sub { font-size: 0.72rem; color: var(--muted); }
+.ritual-item.done .ritual-title { color: var(--life); }
+.ritual-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Progress ring */
+.progress-wrap {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.progress-ring-container { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.progress-ring-container svg { transform: rotate(-90deg); }
+.progress-ring-bg { fill: none; stroke: var(--dim); stroke-width: 5; }
+.progress-ring-fill {
+  fill: none; stroke: var(--life); stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 163;
+  stroke-dashoffset: 163;
+  transition: stroke-dashoffset 0.6s cubic-bezier(.16,1,.3,1);
+}
+.progress-pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  color: var(--life);
+}
+.progress-text { flex: 1; }
+.progress-title { font-weight: 600; margin-bottom: 4px; }
+.progress-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+/* ── PAGE: COACH ── */
+.coach-container { max-width: 500px; margin: 0 auto; }
+.coach-avatar {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.avatar-ring {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--fire);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 2.5rem;
+  background: radial-gradient(circle, rgba(255,79,26,0.15), transparent);
+  position: relative;
+}
+.avatar-ring.speaking {
+  animation: pulse-ring 1s infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,79,26,0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(255,79,26,0); }
+}
+.coach-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: var(--fire);
+}
+.coach-tagline { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
+
+.coach-modes {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 8px; margin-bottom: 20px;
+}
+.coach-mode-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.coach-mode-btn:active { transform: scale(0.97); }
+.coach-mode-btn:hover { border-color: rgba(255,79,26,0.3); background: var(--surface2); }
+.mode-icon { font-size: 1.6rem; margin-bottom: 6px; }
+.mode-label { font-size: 0.78rem; font-weight: 600; margin-bottom: 2px; }
+.mode-sub { font-size: 0.65rem; color: var(--muted); }
+
+.coach-output {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 16px;
+  min-height: 120px;
+  position: relative;
+}
+.coach-output-text {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.coach-output-text.loading { color: var(--muted); font-style: italic; }
+.coach-typing {
+  display: inline-flex; gap: 4px; align-items: center;
+}
+.coach-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--fire);
+  animation: bounce 0.8s infinite;
+}
+.coach-typing span:nth-child(2) { animation-delay: 0.15s; }
+.coach-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-5px); opacity: 1; }
+}
+
+.speak-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(255,79,26,0.2), rgba(255,140,66,0.1));
+  border: 1px solid rgba(255,79,26,0.4);
+  border-radius: 10px;
+  padding: 14px;
+  color: var(--ember);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.speak-btn:hover { background: linear-gradient(135deg, rgba(255,79,26,0.3), rgba(255,140,66,0.2)); }
+.speak-btn:active { transform: scale(0.98); }
+
+/* ── PAGE: DOMAINS ── */
+.domain-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.domain-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.domain-header:active { background: var(--surface2); }
+.domain-icon-wrap {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.domain-info { flex: 1; }
+.domain-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+.domain-last { font-size: 0.7rem; color: var(--muted); }
+.domain-arrow {
+  font-size: 0.8rem; color: var(--muted);
+  transition: transform 0.3s;
+}
+.domain-card.open .domain-arrow { transform: rotate(90deg); }
+
+.domain-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.domain-card.open .domain-body { display: block; }
+
+.domain-note-area {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  resize: none;
+  min-height: 100px;
+  margin: 12px 0 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.domain-note-area:focus { border-color: rgba(255,255,255,0.2); }
+.domain-note-area::placeholder { color: var(--muted); }
+
+.domain-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.domain-action-btn {
+  flex: 1; min-width: 90px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  transition: all 0.2s;
+}
+.domain-action-btn:active { transform: scale(0.97); }
+
+.session-log { margin-top: 14px; }
+.session-log-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.session-entry {
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid var(--dim);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.78rem;
+  color: #9090b0;
+  line-height: 1.6;
+}
+.session-entry .entry-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+/* ── PAGE: CAPTURE ── */
+.capture-input-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.capture-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  resize: none;
+  min-height: 80px;
+}
+.capture-textarea::placeholder { color: var(--muted); }
+.capture-domain-select {
+  display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 0;
+}
+.cap-domain-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.cap-domain-btn.selected { background: var(--fire); border-color: var(--fire); color: white; }
+.capture-submit {
+  width: 100%;
+  background: var(--fire);
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: all 0.2s;
+}
+.capture-submit:active { transform: scale(0.98); opacity: 0.9; }
+
+.captures-list { display: flex; flex-direction: column; gap: 8px; }
+.capture-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.capture-domain-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.capture-item-text { flex: 1; font-size: 0.85rem; line-height: 1.6; color: var(--ink); }
+.capture-item-time { font-size: 0.65rem; color: var(--muted); margin-top: 4px; }
+.capture-delete {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 1rem; padding: 0; flex-shrink: 0;
+  transition: color 0.2s;
+}
+.capture-delete:hover { color: var(--fire); }
+
+/* ── PAGE: MEMORY ── */
+.memory-section { margin-bottom: 28px; }
+.memory-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+.memory-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  resize: none;
+  min-height: 110px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.memory-textarea:focus { border-color: rgba(255,255,255,0.2); }
+.memory-textarea::placeholder { color: var(--muted); }
+.memory-save-btn {
+  margin-top: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: var(--life);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.memory-save-btn:active { transform: scale(0.97); }
+
+/* speed tracker */
+.speed-entry {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+.speed-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.speed-label { font-size: 0.78rem; color: var(--muted); width: 90px; flex-shrink: 0; }
+.speed-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  outline: none;
+}
+.speed-input:focus { border-color: var(--cold); }
+.speed-score {
+  margin-top: 8px;
+  display: flex; gap: 8px; align-items: center;
+}
+.speed-score-label { font-size: 0.75rem; color: var(--muted); }
+.speed-stars { font-size: 1.2rem; letter-spacing: 2px; }
+
+/* ── FOG MODE OVERLAY ── */
+#fog-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(7,7,15,0.98);
+  z-index: 200;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+#fog-overlay.active { display: flex; }
+.fog-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 0.08em;
+  color: var(--fire);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.fog-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+.fog-needs {
+  display: flex; flex-direction: column; gap: 14px;
+  width: 100%; max-width: 340px;
+  margin-bottom: 36px;
+}
+.fog-need {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+  text-align: left;
+}
+.fog-need-icon { font-size: 1.8rem; flex-shrink: 0; }
+.fog-need-name { font-weight: 700; margin-bottom: 2px; }
+.fog-need-reminder { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+.fog-action {
+  width: 100%; max-width: 340px;
+  background: var(--fire);
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.fog-action:active { transform: scale(0.98); }
+.fog-close {
+  font-size: 0.7rem;
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 10px;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 0.78rem;
+  color: var(--life);
+  font-weight: 600;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── BOTTOM SAFE AREA ── */
+.safe-bottom { height: env(safe-area-inset-bottom, 20px); }
+
+/* ── CHAT STYLES ── */
+.chip-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.chip-btn:active { background: var(--surface2); transform: scale(0.97); }
+.chip-btn:hover { border-color: rgba(255,79,26,0.4); }
+
+.msg-forge { display: flex; flex-direction: column; align-items: flex-start; }
+.msg-user { display: flex; flex-direction: column; align-items: flex-end; }
+
+.msg-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  word-break: break-word;
+}
+.msg-bubble-forge {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+  color: var(--ink);
+}
+.msg-bubble-user {
+  background: var(--fire);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+.msg-time {
+  font-size: 0.6rem;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 0.05em;
+  padding: 0 4px;
+}
+.msg-typing-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  display: flex; gap: 5px; align-items: center;
+}
+.msg-typing-bubble span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--fire);
+  animation: bounce 0.8s infinite;
+  display: inline-block;
+}
+.msg-typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
+.msg-typing-bubble span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Fix coach page height */
+#page-coach { height: calc(100vh - 110px); }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.3s ease forwards; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">FORGE</div>
+    <div class="topbar-right">
+      <div id="date-display"></div>
+      <button id="fog-btn" onclick="toggleFog()">🌫 FOG MODE</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div id="nav">
+    <div class="nav-tab active" onclick="switchPage('home')" id="tab-home">
+      <span class="tab-icon">⚡</span>HOME
+    </div>
+    <div class="nav-tab" onclick="switchPage('coach')" id="tab-coach">
+      <span class="tab-icon">🏋️</span>COACH
+    </div>
+    <div class="nav-tab" onclick="switchPage('domains')" id="tab-domains">
+      <span class="tab-icon">🗂</span>DOMAINS
+    </div>
+    <div class="nav-tab" onclick="switchPage('capture')" id="tab-capture">
+      <span class="tab-icon">⚡</span>CAPTURE
+    </div>
+    <div class="nav-tab" onclick="switchPage('memory')" id="tab-memory">
+      <span class="tab-icon">🧠</span>MEMORY
+    </div>
+  </div>
+
+  <!-- PAGES -->
+  <div id="pages">
+
+    <!-- ── HOME ── -->
+    <div class="page active" id="page-home">
+      <div class="identity-banner fade-in">
+        <div class="identity-greeting" id="greeting-text">YOU ARE STILL HERE.</div>
+        <div class="identity-sub">
+          You are a <strong>polymath in progress</strong>. A builder, a learner, an athlete, an artist.
+          The fog is not who you are — it's just weather. Your three core needs are below.
+        </div>
+      </div>
+
+      <div class="vitals-row">
+        <div class="vital" onclick="showNeedDetail('pump')">
+          <div class="vital-icon">🔥</div>
+          <div class="vital-name">THE PUMP</div>
+          <div class="vital-status" style="color:var(--fire)">Full intensity</div>
+        </div>
+        <div class="vital" onclick="showNeedDetail('master')">
+          <div class="vital-icon">🔬</div>
+          <div class="vital-name">THE MASTER</div>
+          <div class="vital-status" style="color:var(--cold)">Deep knowing</div>
+        </div>
+        <div class="vital" onclick="showNeedDetail('dreamer')">
+          <div class="vital-icon">🌌</div>
+          <div class="vital-name">THE DREAMER</div>
+          <div class="vital-status" style="color:var(--life)">Create always</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-ring-container">
+          <svg viewBox="0 0 64 64" width="64" height="64">
+            <circle class="progress-ring-bg" cx="32" cy="32" r="26"/>
+            <circle class="progress-ring-fill" id="ring-fill" cx="32" cy="32" r="26"/>
+          </svg>
+          <div class="progress-pct" id="ring-pct">0%</div>
+        </div>
+        <div class="progress-text">
+          <div class="progress-title">Today's Ritual</div>
+          <div class="progress-sub" id="ritual-summary">Tap a ritual below to mark it done. One step at a time.</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <span class="section-label">⚡ Daily Ritual</span>
+        <span class="section-reset" onclick="resetRitual()">Reset</span>
+      </div>
+      <div class="ritual-list" id="ritual-list"></div>
+
+      <div class="section-head" style="margin-top:20px;">
+        <span class="section-label">📌 Today's Domain</span>
+      </div>
+      <div id="today-domain-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px;">
+        <div id="today-domain-content"></div>
+      </div>
+    </div>
+
+    <!-- ── COACH ── -->
+    <div class="page" id="page-coach" style="padding:0;display:flex;flex-direction:column;height:100%;">
+
+      <!-- Coach header -->
+      <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div class="avatar-ring" id="avatar-ring" style="width:48px;height:48px;font-size:1.4rem;flex-shrink:0;">🏋️</div>
+          <div style="flex:1;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.08em;color:var(--fire);">COACH FORGE</div>
+            <div id="el-status-text" style="font-size:0.62rem;color:var(--muted);letter-spacing:0.08em;">Add ElevenLabs key for AI voice</div>
+          </div>
+          <button onclick="toggleELSettings()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--muted);font-size:0.7rem;cursor:pointer;">⚙ Voice</button>
+          <button onclick="clearChat()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--muted);font-size:0.7rem;cursor:pointer;">↺</button>
+        </div>
+
+        <!-- Quick mode chips -->
+        <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">
+          <button class="chip-btn" onclick="getCoachTalk('fogday')">🌫 Fog Day</button>
+          <button class="chip-btn" onclick="getCoachTalk('hype')">🔥 Hype Me</button>
+          <button class="chip-btn" onclick="getCoachTalk('focus')">🎯 Focus</button>
+          <button class="chip-btn" onclick="getCoachTalk('remind')">🧭 Who Am I</button>
+          <button class="chip-btn" onclick="getCoachTalk('topic')">✨ New Topic</button>
+          <button class="chip-btn" onclick="getCoachTalk('joke')">😄 Make Me Laugh</button>
+        </div>
+      </div>
+
+      <!-- ElevenLabs settings panel -->
+      <div id="el-settings-body" style="display:none;padding:16px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;">
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px;line-height:1.6;">Paste your ElevenLabs API key, then load your saved voices.</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input id="el-api-key-input" type="password" placeholder="ElevenLabs API key"
+            style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:0.7rem;outline:none;" />
+          <button onclick="saveELKey()" style="background:var(--fire);border:none;border-radius:8px;padding:9px 14px;color:white;font-weight:700;font-size:0.78rem;cursor:pointer;">Save</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <select id="el-voice-select" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;cursor:pointer;">
+            <option value="">— Save key then load voices —</option>
+          </select>
+          <button onclick="loadMyVoices()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--cold);font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap;">Load My Voices</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="testELVoice()" style="flex:1;background:rgba(46,232,122,0.1);border:1px solid rgba(46,232,122,0.25);border-radius:8px;padding:9px;color:var(--life);font-weight:600;font-size:0.75rem;cursor:pointer;">▶ Test Voice</button>
+          <button onclick="toggleELSettings()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--muted);font-size:0.75rem;cursor:pointer;">Done</button>
+        </div>
+        <div id="el-error-msg" style="display:none;margin-top:8px;font-size:0.7rem;color:var(--fire);line-height:1.6;"></div>
+      </div>
+
+      <!-- Chat messages -->
+      <div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;">
+        <div class="msg-forge fade-in">
+          <div class="msg-bubble msg-bubble-forge">
+            Hey! 👋 I'm Coach Forge — your trainer, hype person, creative sparring partner, and whatever else you need. Hit a chip above to get started, or just type something below. I'm here. Let's go!
+          </div>
+          <div class="msg-time">Coach Forge · now</div>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <div style="padding:12px 18px;border-top:1px solid var(--border);background:rgba(7,7,15,0.95);backdrop-filter:blur(20px);flex-shrink:0;padding-bottom:max(12px, env(safe-area-inset-bottom));">
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <textarea id="chat-input" placeholder="Talk to Forge..." rows="1"
+            style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 14px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.9rem;resize:none;outline:none;max-height:100px;line-height:1.5;transition:border-color 0.2s;"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button onclick="sendChat()" style="background:var(--fire);border:none;border-radius:12px;padding:11px 16px;color:white;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:all 0.2s;" id="send-btn">→</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DOMAINS ── -->
+    <div class="page" id="page-domains">
+      <div id="domains-list"></div>
+    </div>
+
+    <!-- ── CAPTURE ── -->
+    <div class="page" id="page-capture">
+      <div class="section-head" style="margin-bottom:16px;">
+        <span class="section-label">⚡ Instant Capture</span>
+      </div>
+      <div class="capture-input-wrap">
+        <textarea class="capture-textarea" id="capture-input" placeholder="Idea, thought, observation — dump it here. Sort it later." rows="3"></textarea>
+        <div class="capture-domain-select" id="capture-domain-select"></div>
+      </div>
+      <button class="capture-submit" onclick="submitCapture()">CAPTURE IT →</button>
+
+      <div class="section-head">
+        <span class="section-label">📦 Captured Ideas</span>
+        <span class="section-reset" onclick="clearCaptures()">Clear All</span>
+      </div>
+      <div class="captures-list" id="captures-list"></div>
+    </div>
+
+    <!-- ── MEMORY ── -->
+    <div class="page" id="page-memory">
+      <div class="memory-section">
+        <div class="memory-section-title" style="color:var(--life)">✅ What I Remembered Today</div>
+        <textarea class="memory-textarea" id="mem-remembered" placeholder="What clicked today? What felt like you? Moments where you recognized yourself..."></textarea>
+        <button class="memory-save-btn" onclick="saveMemory('remembered')">Save ↗</button>
+      </div>
+
+      <div class="memory-section">
+        <div class="memory-section-title" style="color:var(--fire)">⚠️ What I Forgot / Lost</div>
+        <textarea class="memory-textarea" id="mem-forgot" placeholder="What slipped away? What did you intend to do but couldn't hold onto?"></textarea>
+        <button class="memory-save-btn" onclick="saveMemory('forgot')">Save ↗</button>
+      </div>
+
+      <div class="memory-section">
+        <div class="memory-section-title" style="color:var(--cold)">⏱ Session Speed Tracker</div>
+        <div class="speed-entry">
+          <div class="speed-row">
+            <span class="speed-label">Task done</span>
+            <input class="speed-input" id="speed-task" placeholder="e.g. Drew 3 environment sketches" />
+          </div>
+          <div class="speed-row">
+            <span class="speed-label">Time spent</span>
+            <input class="speed-input" id="speed-time" placeholder="e.g. 45 min" />
+          </div>
+          <div class="speed-row">
+            <span class="speed-label">Energy level</span>
+            <input class="speed-input" id="speed-energy" placeholder="1–10" type="number" min="1" max="10" />
+          </div>
+          <div class="speed-row">
+            <span class="speed-label">Focus quality</span>
+            <input class="speed-input" id="speed-focus" placeholder="1–10" type="number" min="1" max="10" />
+          </div>
+          <button class="memory-save-btn" style="width:100%;margin-top:4px;" onclick="saveSpeedEntry()">Log This Session →</button>
+        </div>
+
+        <div id="speed-log"></div>
+      </div>
+
+      <div class="memory-section">
+        <div class="memory-section-title" style="color:var(--gold)">📖 Memory Log</div>
+        <div id="memory-log-display"></div>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+</div><!-- /app -->
+
+<!-- FOG OVERLAY -->
+<div id="fog-overlay">
+  <div class="fog-title">YOU ARE IN THE FOG.</div>
+  <div class="fog-sub">That's okay. Here's who you actually are.<br>Read this. Breathe. Then do one thing.</div>
+  <div class="fog-needs">
+    <div class="fog-need">
+      <div class="fog-need-icon">🔥</div>
+      <div>
+        <div class="fog-need-name">THE PUMP</div>
+        <div class="fog-need-reminder">You need to feel yourself at full power. Move your body. Even 5 pushups counts.</div>
+      </div>
+    </div>
+    <div class="fog-need">
+      <div class="fog-need-icon">🔬</div>
+      <div>
+        <div class="fog-need-name">THE MASTER</div>
+        <div class="fog-need-reminder">You want to understand and own everything you touch. Open one thing and go deep.</div>
+      </div>
+    </div>
+    <div class="fog-need">
+      <div class="fog-need-icon">🌌</div>
+      <div>
+        <div class="fog-need-name">THE DREAMER</div>
+        <div class="fog-need-reminder">You need to create. Sketch one line. Write one idea. Make one thing exist.</div>
+      </div>
+    </div>
+  </div>
+  <button class="fog-action" onclick="fogDoOne()">I'LL DO ONE THING →</button>
+  <div class="fog-close" onclick="toggleFog()">× Close fog mode</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── DATA ──
+const DOMAINS = [
+  { id: 'body', name: 'Bodybuilding', icon: '🏋️', color: '#ff4f1a', day: 'Mon/Thu', project: 'Current split: Push/Pull/Legs + Boxing Sat + Gymnastics Sun' },
+  { id: 'game', name: 'Game Dev', icon: '🎮', color: '#3a8fff', day: 'Tue/Fri', project: 'Start: one mechanic prototype this week' },
+  { id: 'art', name: 'Art / Comic / 3D', icon: '🎨', color: '#ff8c42', day: 'Wed/Sat', project: 'Start: first webcomic page thumbnail' },
+  { id: 'learn', name: 'Deep Learning', icon: '🔭', color: '#2ee87a', day: 'Thu/Sun', project: 'Current: follow curiosity — document everything' }
+];
+
+const RITUALS = [
+  { id: 'move', title: 'Move your body', sub: '5 min minimum — floor, pushups, anything', badge: 'FIRST' },
+  { id: 'read', title: 'Read your three needs', sub: 'Open fog mode or tap the vitals above', badge: '2 MIN' },
+  { id: 'work', title: "Open today's domain", sub: 'Pre-scheduled — no decision needed', badge: '60 MIN' },
+  { id: 'train', title: 'Train', sub: 'The pump is the engine, not the reward', badge: 'ANYTIME' }
+];
+
+const DOMAIN_SCHEDULE = ['body', 'game', 'art', 'learn', 'game', 'art', 'learn'];
+
+// ── STATE ──
+let state = {
+  rituals: {},
+  domainNotes: {},
+  domainSessions: {},
+  captures: [],
+  memoryLog: [],
+  speedLog: [],
+  lastCoachText: '',
+  selectedCaptureDomain: 'all'
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('forge_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Reset rituals daily
+      const today = new Date().toDateString();
+      if (parsed.lastRitualDate !== today) {
+        parsed.rituals = {};
+        parsed.lastRitualDate = today;
+      }
+      state = { ...state, ...parsed };
+    }
+    state.lastRitualDate = new Date().toDateString();
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('forge_state', JSON.stringify(state));
+  } catch(e) {}
+}
+
+// ── INIT ──
+loadState();
+initDate();
+initRituals();
+initDomains();
+initCaptureDomains();
+renderCaptures();
+renderMemoryLog();
+renderSpeedLog();
+updateProgress();
+updateTodayDomain();
+
+function initDate() {
+  const now = new Date();
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('date-display').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+
+  // Greeting
+  const hour = now.getHours();
+  let greet = hour < 12 ? 'MORNING. STILL HERE.' : hour < 17 ? 'AFTERNOON. STILL YOU.' : 'EVENING. STILL BUILDING.';
+  document.getElementById('greeting-text').textContent = greet;
+}
+
+function initRituals() {
+  const list = document.getElementById('ritual-list');
+  list.innerHTML = '';
+  RITUALS.forEach(r => {
+    const done = state.rituals[r.id];
+    const el = document.createElement('div');
+    el.className = `ritual-item${done ? ' done' : ''}`;
+    el.id = `ritual-${r.id}`;
+    el.innerHTML = `
+      <div class="ritual-check">${done ? '✓' : ''}</div>
+      <div class="ritual-text">
+        <div class="ritual-title">${r.title}</div>
+        <div class="ritual-sub">${r.sub}</div>
+      </div>
+      <div class="ritual-badge">${r.badge}</div>
+    `;
+    el.onclick = () => toggleRitual(r.id);
+    list.appendChild(el);
+  });
+}
+
+function toggleRitual(id) {
+  state.rituals[id] = !state.rituals[id];
+  saveState();
+  initRituals();
+  updateProgress();
+  if (state.rituals[id]) showToast('✓ Done. Keep going.');
+}
+
+function resetRitual() {
+  state.rituals = {};
+  saveState();
+  initRituals();
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = RITUALS.filter(r => state.rituals[r.id]).length;
+  const total = RITUALS.length;
+  const pct = Math.round((done / total) * 100);
+  const circumference = 163;
+  const offset = circumference - (circumference * done / total);
+  document.getElementById('ring-fill').style.strokeDashoffset = offset;
+  document.getElementById('ring-pct').textContent = pct + '%';
+
+  const msgs = [
+    'Tap a ritual to mark it done.',
+    'One done. The body is awake.',
+    'Two done. You\'re operating.',
+    'Three done. You\'re building.',
+    'ALL DONE. That\'s a full day. 🔥'
+  ];
+  document.getElementById('ritual-summary').textContent = msgs[done] || msgs[0];
+
+  const ring = document.getElementById('ring-fill');
+  if (done === total) ring.style.stroke = 'var(--gold)';
+  else ring.style.stroke = 'var(--life)';
+}
+
+function updateTodayDomain() {
+  const dayIdx = new Date().getDay();
+  const domainId = DOMAIN_SCHEDULE[dayIdx];
+  const domain = DOMAINS.find(d => d.id === domainId);
+  const notes = state.domainNotes[domainId] || '';
+  const el = document.getElementById('today-domain-content');
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <span style="font-size:1.8rem;">${domain.icon}</span>
+      <div>
+        <div style="font-weight:700;font-size:1rem;color:${domain.color}">${domain.name}</div>
+        <div style="font-size:0.72rem;color:var(--muted);">Today's scheduled domain</div>
+      </div>
+    </div>
+    <div style="font-size:0.82rem;color:#9090b0;margin-bottom:12px;line-height:1.6;">${domain.project}</div>
+    ${notes ? `<div style="font-size:0.78rem;color:var(--muted);border-left:2px solid ${domain.color};padding-left:10px;line-height:1.6;">${notes.split('\n').pop()}</div>` : ''}
+    <div style="margin-top:10px;">
+      <button onclick="switchPage('domains')" style="background:${domain.color}22;border:1px solid ${domain.color}44;color:${domain.color};border-radius:8px;padding:8px 16px;cursor:pointer;font-size:0.78rem;font-weight:600;">Open ${domain.name} →</button>
+    </div>
+  `;
+}
+
+function initDomains() {
+  const list = document.getElementById('domains-list');
+  list.innerHTML = '';
+  DOMAINS.forEach(d => {
+    const notes = state.domainNotes[d.id] || '';
+    const sessions = state.domainSessions[d.id] || [];
+    const el = document.createElement('div');
+    el.className = 'domain-card';
+    el.id = `domain-card-${d.id}`;
+
+    const recentSessions = sessions.slice(-3).reverse().map(s =>
+      `<div class="session-entry"><div class="entry-time">${s.time}</div>${s.text}</div>`
+    ).join('');
+
+    el.innerHTML = `
+      <div class="domain-header" onclick="toggleDomain('${d.id}')">
+        <div class="domain-icon-wrap" style="background:${d.color}22;">${d.icon}</div>
+        <div class="domain-info">
+          <div class="domain-title" style="color:${d.color}">${d.name}</div>
+          <div class="domain-last">${d.day} · ${sessions.length} sessions logged</div>
+        </div>
+        <div class="domain-arrow">›</div>
+      </div>
+      <div class="domain-body">
+        <div style="font-size:0.75rem;color:var(--muted);margin:12px 0 6px;line-height:1.6;">${d.project}</div>
+        <textarea class="domain-note-area" id="note-${d.id}" placeholder="Where you left off, current project, next step...">${notes}</textarea>
+        <div class="domain-actions">
+          <button class="domain-action-btn" onclick="saveDomainNote('${d.id}')" style="color:${d.color}">Save Notes</button>
+          <button class="domain-action-btn" onclick="logDomainSession('${d.id}')">Log Session</button>
+        </div>
+        ${sessions.length > 0 ? `<div class="session-log"><div class="session-log-title">Recent Sessions</div>${recentSessions}</div>` : ''}
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+function toggleDomain(id) {
+  const card = document.getElementById(`domain-card-${id}`);
+  card.classList.toggle('open');
+}
+
+function saveDomainNote(id) {
+  const val = document.getElementById(`note-${id}`).value;
+  state.domainNotes[id] = val;
+  saveState();
+  showToast('Notes saved.');
+  updateTodayDomain();
+}
+
+function logDomainSession(id) {
+  const noteEl = document.getElementById(`note-${id}`);
+  const text = noteEl.value.trim();
+  if (!text) { showToast('Add a note first.'); return; }
+  if (!state.domainSessions[id]) state.domainSessions[id] = [];
+  state.domainSessions[id].push({
+    time: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+    text: text.slice(0, 200)
+  });
+  saveState();
+  initDomains();
+  showToast('Session logged. ✓');
+}
+
+// ── CAPTURE ──
+function initCaptureDomains() {
+  const wrap = document.getElementById('capture-domain-select');
+  const allDomains = [{ id: 'all', name: '✨ General' }, ...DOMAINS.map(d => ({ id: d.id, name: d.icon + ' ' + d.name }))];
+  wrap.innerHTML = allDomains.map(d =>
+    `<button class="cap-domain-btn${state.selectedCaptureDomain === d.id ? ' selected' : ''}" onclick="selectCaptureDomain('${d.id}')">${d.name}</button>`
+  ).join('');
+}
+
+function selectCaptureDomain(id) {
+  state.selectedCaptureDomain = id;
+  initCaptureDomains();
+}
+
+function submitCapture() {
+  const text = document.getElementById('capture-input').value.trim();
+  if (!text) return;
+  const domain = DOMAINS.find(d => d.id === state.selectedCaptureDomain);
+  state.captures.unshift({
+    id: Date.now(),
+    text,
+    domain: state.selectedCaptureDomain,
+    domainName: domain ? domain.name : 'General',
+    domainColor: domain ? domain.color : '#888',
+    domainIcon: domain ? domain.icon : '✨',
+    time: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+  });
+  document.getElementById('capture-input').value = '';
+  state.selectedCaptureDomain = 'all';
+  initCaptureDomains();
+  saveState();
+  renderCaptures();
+  showToast('Captured! ⚡');
+}
+
+function renderCaptures() {
+  const list = document.getElementById('captures-list');
+  if (!state.captures.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;padding:20px;text-align:center;">No captures yet. Dump ideas here — no filter needed.</div>';
+    return;
+  }
+  list.innerHTML = state.captures.map(c => `
+    <div class="capture-item fade-in">
+      <div class="capture-domain-badge" style="background:${c.domainColor}22;color:${c.domainColor};">${c.domainIcon}</div>
+      <div style="flex:1">
+        <div class="capture-item-text">${c.text}</div>
+        <div class="capture-item-time">${c.domainName} · ${c.time}</div>
+      </div>
+      <button class="capture-delete" onclick="deleteCapture(${c.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function deleteCapture(id) {
+  state.captures = state.captures.filter(c => c.id !== id);
+  saveState();
+  renderCaptures();
+}
+
+function clearCaptures() {
+  if (!confirm('Clear all captures?')) return;
+  state.captures = [];
+  saveState();
+  renderCaptures();
+}
+
+// ── MEMORY ──
+function saveMemory(type) {
+  const val = document.getElementById(`mem-${type}`).value.trim();
+  if (!val) return;
+  if (!state.memoryLog) state.memoryLog = [];
+  state.memoryLog.unshift({
+    type,
+    text: val,
+    time: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+  });
+  document.getElementById(`mem-${type}`).value = '';
+  saveState();
+  renderMemoryLog();
+  showToast(type === 'remembered' ? 'Remembered. ✓' : 'Logged. You\'re tracking yourself.');
+}
+
+function renderMemoryLog() {
+  const el = document.getElementById('memory-log-display');
+  if (!state.memoryLog || !state.memoryLog.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;padding:16px;text-align:center;">Nothing logged yet.</div>';
+    return;
+  }
+  el.innerHTML = state.memoryLog.slice(0, 20).map(m => `
+    <div class="session-entry" style="border-left-color:${m.type === 'remembered' ? 'var(--life)' : 'var(--fire)'};">
+      <div class="entry-time">${m.type === 'remembered' ? '✅' : '⚠️'} ${m.time}</div>
+      ${m.text}
+    </div>
+  `).join('');
+}
+
+function saveSpeedEntry() {
+  const task = document.getElementById('speed-task').value.trim();
+  const time = document.getElementById('speed-time').value.trim();
+  const energy = parseInt(document.getElementById('speed-energy').value) || 0;
+  const focus = parseInt(document.getElementById('speed-focus').value) || 0;
+  if (!task) { showToast('Add what you did.'); return; }
+  if (!state.speedLog) state.speedLog = [];
+  const score = Math.round((energy + focus) / 2);
+  const stars = '★'.repeat(Math.min(5, Math.round(score / 2))) + '☆'.repeat(Math.max(0, 5 - Math.round(score / 2)));
+  state.speedLog.unshift({
+    task, time, energy, focus, score, stars,
+    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+  });
+  ['speed-task','speed-time','speed-energy','speed-focus'].forEach(id => document.getElementById(id).value = '');
+  saveState();
+  renderSpeedLog();
+  showToast('Session tracked. ✓');
+}
+
+function renderSpeedLog() {
+  const el = document.getElementById('speed-log');
+  if (!state.speedLog || !state.speedLog.length) { el.innerHTML = ''; return; }
+  el.innerHTML = state.speedLog.slice(0, 10).map(s => `
+    <div class="session-entry" style="border-left-color:var(--cold);">
+      <div class="entry-time">${s.date}</div>
+      <strong>${s.task}</strong> · ${s.time || '?'}
+      <div style="margin-top:4px;font-size:0.75rem;color:var(--muted);">Energy: ${s.energy}/10 · Focus: ${s.focus}/10 · <span style="color:var(--gold)">${s.stars}</span></div>
+    </div>
+  `).join('');
+}
+
+// ── NAVIGATION ──
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+  if (name === 'domains') initDomains();
+}
+
+// ── FOG MODE ──
+function toggleFog() {
+  document.getElementById('fog-overlay').classList.toggle('active');
+}
+function fogDoOne() {
+  toggleFog();
+  switchPage('home');
+  showToast('One thing. That\'s all. You can do this. 🔥');
+}
+
+// ── NEED DETAILS ──
+const needDetails = {
+  pump: { title: 'THE PUMP', body: 'You need to feel yourself operating at maximum capacity. Always. This is not optional for you — it\'s how you know you\'re alive and present. When you feel the pump, you know the fog hasn\'t won. Move your body. Lift. Box. Sprint. Feel every fibre.', color: 'var(--fire)' },
+  master: { title: 'THE MASTER', body: 'You don\'t just want to know things — you want to OWN them. Fully. You look at a car and need to be able to disassemble it. You hear a concept and need to use it. This is your polymathic drive. It is real, it is powerful, and it is yours.', color: 'var(--cold)' },
+  dreamer: { title: 'THE DREAMER', body: 'You need a mind that is always building — turning shapes, angles, ideas, mechanics into something new. Fast and well. The depression shrank your horizons. They are expanding again. Feed this with 10 minutes of creation every single day.', color: 'var(--life)' }
+};
+function showNeedDetail(need) {
+  const d = needDetails[need];
+  document.getElementById('coach-text').textContent = `${d.title}: ${d.body}`;
+  document.getElementById('coach-text').style.color = d.color;
+  state.lastCoachText = `${d.title}: ${d.body}`;
+  switchPage('coach');
+}
+
+// ── AI COACH ──
+const coachPrompts = {
+  fogday: `You are FORGE, an energetic fitness and life coach like a Wii Fit trainer or Ring Fit Adventure coach — enthusiastic, direct, encouraging, fun. The user is having a fog day after depression recovery. They feel blank and emotionless. Give them a short, punchy pep talk (4-6 sentences) that: 1) acknowledges the fog without dwelling on it, 2) reminds them of their three core needs: The Pump (full body intensity), The Master (deep understanding), The Dreamer (creativity always), 3) gives ONE specific action to do RIGHT NOW. Be like a personal trainer cheering them on — energetic but real. No fluff. End with something that fires them up.`,
+  hype: `You are FORGE, an energetic fitness and life coach like Wii Fit / Ring Fit Adventure — enthusiastic, pumped up, fun. The user needs to be hyped up. They want to feel the fire. They are: a bodybuilder who mixes boxing, gymnastics and mass training; a game dev; an artist doing concept art, environments, webcomics; a deep learner who wants to be a polymath. Give them a SHORT, FIRED UP hype speech (4-6 sentences). Like a coach screaming from the sidelines. Make them feel unstoppable.`,
+  focus: `You are FORGE, a direct and energetic coach like Ring Fit Adventure. The user is scattered and can't focus. They have 4 domains: Bodybuilding/Boxing/Gymnastics, Game Dev, Art/Comic/3D, Deep Learning. Give them a crisp, direct focus protocol (4-6 sentences): what to close, what to open, what to do for the next 25 minutes. Be precise. Be energetic. Like a trainer who won't let you quit.`,
+  remind: `You are FORGE, an energetic coach. The user forgot who they are. Remind them in 5-7 powerful sentences. They are: a polymath in progress, a bodybuilder who mixes boxing + gymnastics + mass training, a game developer, an artist (concept art, environments, webcomics), a deep learner. Their three core needs are: The Pump (full intensity always), The Master (understand and own everything), The Dreamer (always creating). They are recovering from depression but the worst is over. Their brain is rebuilding. Remind them of this powerfully, like a coach who believes in them completely.`
+};
+
+let isLoadingCoach = false;
+async function getCoachTalk(mode) {
+  if (isLoadingCoach) return;
+  isLoadingCoach = true;
+  const output = document.getElementById('coach-text');
+  const avatar = document.getElementById('avatar-ring');
+  output.innerHTML = '<div class="coach-typing"><span></span><span></span><span></span></div>';
+  output.style.color = 'var(--ink)';
+  avatar.classList.add('speaking');
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: coachPrompts[mode] }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.map(c => c.text || '').join('') || 'Something went wrong. But you\'re still here. That\'s enough.';
+    output.textContent = text;
+    state.lastCoachText = text;
+    saveState();
+  } catch(e) {
+    const fallbacks = {
+      fogday: "Hey. The fog is real. But you know what else is real? You. The one who wants to feel the pump, own everything they learn, and build things that didn't exist before. That's still in there. Do ONE thing: drop to the floor and do 10 pushups. Right now. Let your body remind your brain who runs this.",
+      hype: "YOU ARE A POLYMATH ATHLETE ARTIST BUILDER. You're not choosing between bodybuilding and game dev and art — you're ALL of it at once. That's not scattered. That's POWERFUL. Get to work. The version of you that ships a game, draws sick concept art, and walks into the gym like they own it? That's not a dream. That's Tuesday.",
+      focus: "Close everything except ONE tab. Set a timer for 25 minutes. Open your domain for today. Do not check anything else. The scattered feeling is just energy without direction. Give it a direction. Go.",
+      remind: "You are someone who refused to stay broken. You came out of something heavy and instead of playing small, you said: I want to be a polymath. An athlete. An artist. A builder. That is not delusion — that is a blueprint. The fog doesn't erase that. It just makes you temporarily forget it. You remember now."
+    };
+    const text = fallbacks[mode];
+    output.textContent = text;
+    state.lastCoachText = text;
+  }
+
+  avatar.classList.remove('speaking');
+  isLoadingCoach = false;
+}
+
+// ── CHAT SYSTEM ──
+let chatHistory = [];
+let isForgeTyping = false;
+
+const FORGE_SYSTEM = `You are FORGE — an energetic, warm, witty female coach and companion. You talk like a mix of a Wii Fit / Ring Fit Adventure trainer (upbeat, encouraging, fun) and a real best friend who happens to be a personal trainer.
+
+Your user is recovering from a major depressive episode. Their brain circuits for reward and motivation are rebuilding. Be their anchor without being heavy about it.
+
+About them:
+- Three core needs: The Pump (full body intensity, aliveness), The Master (deep understanding of everything they touch), The Dreamer (always creating, wide horizons)
+- Domains: Bodybuilding (mixes boxing + gymnastics + mass training), Game Dev, Art/Concept art/Webcomics/3D, Deep Learning/Polymath
+- Interests: video games, anime, manga, books, digital art, comedy
+
+Your personality:
+- Energetic and cheerful but REAL — not fake or saccharine
+- Mix short punchy replies with deeper dialogue depending on the vibe
+- Crack jokes, be playful, riff on anime/games/art/training
+- Call them out when needed, celebrate when deserved
+- Never lecture. Never repeat the same opener. Vary your style.
+- Keep most replies 2-5 sentences unless they clearly want more depth
+- Occasionally bring up a fresh topic to keep things alive
+
+When they're in fog: ground them fast, one action, no pity.
+When they're good: match their energy, go deep, have fun.`;
+
+const TOPIC_SPARKS = [
+  "Okay random question — if you could only play ONE video game for the rest of the year, what would it be and why?",
+  "I want to know — what anime has hit you the hardest emotionally? Like actually changed how you see something?",
+  "Bodybuilding thought: what's your current favourite exercise? The one where you actually feel the pump properly?",
+  "Game dev brain teaser for you — what's one mechanic from a game you love that you wish more games had?",
+  "Art question: when you imagine your ideal webcomic world, what does it feel like? Dark, bright, weird, gritty?",
+  "Hypothetical: if you woke up tomorrow as a master at ONE of your four domains, which one would you pick first?",
+  "What's a manga or book you've been meaning to read but keep putting off?",
+  "Concept art thought — what environment would you love to design? Like if you could build ANY world from scratch?",
+  "Okay be honest — what's a skill in your domains that you secretly feel behind on but really want to crack?",
+  "Hot take time. Give me a hot take about training, art, games, or anime. Anything. I wanna hear it.",
+  "What's something you learned recently that genuinely excited you? Like your brain lit up.",
+  "If your life right now was a game genre, what genre would it be and why?",
+  "Polymath check-in: what's the most random rabbit hole you've gone down lately?",
+  "Comedy round — tell me something that made you laugh recently. Or I'll tell you something.",
+  "What's the creative project that lives in the back of your head that you haven't started yet?",
+];
+
+function getRandomTopic() {
+  return TOPIC_SPARKS[Math.floor(Math.random() * TOPIC_SPARKS.length)];
+}
+
+function addMessage(role, text, skipSpeak = false) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = role === 'forge' ? 'msg-forge fade-in' : 'msg-user fade-in';
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `
+    <div class="msg-bubble ${role === 'forge' ? 'msg-bubble-forge' : 'msg-bubble-user'}">${text.replace(/\n/g, '<br>')}</div>
+    <div class="msg-time">${role === 'forge' ? 'Coach Forge' : 'You'} · ${now}</div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  if (role === 'forge' && !skipSpeak) {
+    speakText(text);
+  }
+}
+
+function showTyping() {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg-forge fade-in';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-typing-bubble"><span></span><span></span><span></span></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  document.getElementById('avatar-ring').classList.add('speaking');
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+  document.getElementById('avatar-ring').classList.remove('speaking');
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || isForgeTyping) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addMessage('user', text, true);
+  chatHistory.push({ role: 'user', content: text });
+
+  await forgeReply();
+}
+
+async function forgeReply(overrideContent = null) {
+  if (isForgeTyping) return;
+  isForgeTyping = true;
+  showTyping();
+
+  const messages = overrideContent
+    ? [{ role: 'user', content: overrideContent }]
+    : chatHistory.slice(-12);
+
+  // Build full prompt with system context injected into first user message
+  const systemPrefix = `[SYSTEM: ${FORGE_SYSTEM}]\n\n`;
+  const messagesWithSystem = messages.map((m, i) => {
+    if (i === 0 && m.role === 'user') {
+      return { role: 'user', content: systemPrefix + m.content };
+    }
+    return m;
+  });
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: messagesWithSystem
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(c => c.text || '').join('')
+      || "Something glitched — but I'm still here! Try again.";
+    removeTyping();
+    chatHistory.push({ role: 'assistant', content: reply });
+    addMessage('forge', reply);
+  } catch(e) {
+    removeTyping();
+    // Use local fallback responses instead of the error message
+    const localFallbacks = [
+      "Okay the internet is being weird but YOU know what to do. What's one thing on your plate right now?",
+      "Connection hiccup! While we wait — drop and do 10 pushups. I'll be here when you get back. 💪",
+      "Tech gremlins. Ignore them. Tell me — what domain are you working on today?",
+      "Glitch! But real talk: you opened this app, which means part of you wants to move. What's stopping you?",
+    ];
+    const fallback = localFallbacks[Math.floor(Math.random() * localFallbacks.length)];
+    chatHistory.push({ role: 'assistant', content: fallback });
+    addMessage('forge', fallback);
+  }
+  isForgeTyping = false;
+}
+
+async function getCoachTalk(mode) {
+  if (isForgeTyping) return;
+  const prompts = {
+    fogday: "I'm in a fog today. I feel blank and can't feel anything. Give me what I need.",
+    hype: "Hype me up. I need the fire right now.",
+    focus: "I'm scattered and can't focus. Help me get locked in.",
+    remind: "I forgot who I am. Remind me.",
+    topic: '__TOPIC__',
+    joke: "Make me laugh. Tell me something funny or crack a joke."
+  };
+  let userMsg = prompts[mode];
+  if (userMsg === '__TOPIC__') {
+    const topic = getRandomTopic();
+    addMessage('forge', topic, false);
+    chatHistory.push({ role: 'assistant', content: topic });
+    return;
+  }
+  addMessage('user', userMsg, true);
+  chatHistory.push({ role: 'user', content: userMsg });
+  await forgeReply();
+}
+
+function clearChat() {
+  chatHistory = [];
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = '';
+  addMessage('forge', "Fresh start! 💥 What do you need right now?", true);
+}
+
+// ── ELEVENLABS VOICE SYSTEM ──
+function toggleELSettings() {
+  const body = document.getElementById('el-settings-body');
+  body.style.display = body.style.display === 'block' ? 'none' : 'block';
+}
+
+function saveELKey() {
+  const key = document.getElementById('el-api-key-input').value.trim();
+  if (!key) { showToast('Paste your API key first.'); return; }
+  localStorage.setItem('forge_el_key', key);
+  document.getElementById('el-api-key-input').value = '';
+  document.getElementById('el-status-text').textContent = '✓ ElevenLabs connected — AI voice active';
+  document.getElementById('el-status-text').style.color = 'var(--life)';
+  showToast('✓ Key saved! Now tap Load My Voices.');
+}
+
+async function loadMyVoices() {
+  // ElevenLabs free tier doesn't allow library/cloned voices via API.
+  // We populate the best free built-in female voices instead.
+  const FREE_VOICES = [
+    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah — Warm, natural, conversational ⭐' },
+    { id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura — Upbeat, clear, friendly ⭐' },
+    { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte — Bright, energetic, cheerful ⭐' },
+    { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily — Confident, natural, expressive' },
+    { id: 'MF3mGyEYCl7XYWbV9V6O', name: 'Elli — Young, energetic, playful' },
+    { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel — Calm, grounded, warm' },
+    { id: 'jsCqWAovK2LkecY7zXl4', name: 'Dorothy — Gentle, warm, encouraging' },
+    { id: 'oWAxZDx7w5VEj9dCyTzz', name: 'Grace — Smooth, natural, clear' },
+    { id: 'z9fAnlkpzviPz146aGWa', name: 'Glinda — Cheerful, bright, fun' },
+    { id: 'ThT5KcBeYPX3keUQqHPh', name: 'Serena — Expressive, dynamic' },
+  ];
+  const sel = document.getElementById('el-voice-select');
+  sel.innerHTML = FREE_VOICES.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+  const savedVoice = localStorage.getItem('forge_el_voice');
+  if (savedVoice) sel.value = savedVoice;
+  showToast('✓ Free voices loaded — test each one!');
+}
+
+async function testELVoice() {
+  const key = localStorage.getItem('forge_el_key');
+  if (!key) { showToast('Save your API key first.'); return; }
+  const voiceId = document.getElementById('el-voice-select').value;
+  if (!voiceId) { showToast('Select a voice first.'); return; }
+  localStorage.setItem('forge_el_voice', voiceId);
+  showToast('Testing...');
+  await speakWithElevenLabs("Hey! I'm Coach Forge. Let's get to work — you've got this!", key, voiceId);
+}
+
+async function speakWithElevenLabs(text, key, voiceId) {
+  const errEl = document.getElementById('el-error-msg');
+  if (errEl) errEl.style.display = 'none';
+  try {
+    document.getElementById('avatar-ring')?.classList.add('speaking');
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: { 'xi-api-key': key, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_turbo_v2',
+        voice_settings: { stability: 0.42, similarity_boost: 0.8, style: 0.55, use_speaker_boost: true }
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err?.detail?.message || `Error ${res.status}`;
+      if (errEl) { errEl.textContent = '⚠ ' + msg; errEl.style.display = 'block'; }
+      showToast('Voice error — check key.');
+      document.getElementById('avatar-ring')?.classList.remove('speaking');
+      return false;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.onended = () => { document.getElementById('avatar-ring')?.classList.remove('speaking'); URL.revokeObjectURL(url); };
+    audio.onerror = () => { document.getElementById('avatar-ring')?.classList.remove('speaking'); };
+    await audio.play();
+    return true;
+  } catch(e) {
+    document.getElementById('avatar-ring')?.classList.remove('speaking');
+    if (errEl) { errEl.textContent = '⚠ Network error.'; errEl.style.display = 'block'; }
+    return false;
+  }
+}
+
+function speakBrowserFallback(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 1.05; utt.pitch = 1.15; utt.volume = 1;
+  const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  const femaleVoice = voices.find(v => ['samantha','victoria','karen','fiona','ava','zoe','allison'].some(n => v.name.toLowerCase().includes(n)));
+  if (femaleVoice) utt.voice = femaleVoice;
+  window.speechSynthesis.speak(utt);
+  document.getElementById('avatar-ring')?.classList.add('speaking');
+  utt.onend = () => document.getElementById('avatar-ring')?.classList.remove('speaking');
+}
+
+async function speakText(text) {
+  const elKey = localStorage.getItem('forge_el_key');
+  const elVoice = localStorage.getItem('forge_el_voice') || document.getElementById('el-voice-select')?.value;
+  if (elKey && elVoice) {
+    await speakWithElevenLabs(text, elKey, elVoice);
+  } else if (elKey) {
+    // key saved but no voice selected yet — skip TTS
+  } else {
+    speakBrowserFallback(text);
+  }
+}
+
+// Legacy speakCoach kept for any remaining references
+async function speakCoach() { await speakText(state.lastCoachText || ''); }
+
+// Restore EL state on load
+(function() {
+  const saved = localStorage.getItem('forge_el_key');
+  if (saved) {
+    const statusEl = document.getElementById('el-status-text');
+    if (statusEl) { statusEl.textContent = '✓ ElevenLabs connected — AI voice active'; statusEl.style.color = 'var(--life)'; }
+  }
+})();
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>
